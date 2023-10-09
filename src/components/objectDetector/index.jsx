@@ -2,9 +2,10 @@ import React, { useRef, useState } from "react";
 import styled from "styled-components";
 
 import "@tensorflow/tfjs-backend-cpu";
-//import "@tensorflow/tfjs-backend-webgl";
+import "@tensorflow/tfjs-backend-webgl"; //its optional
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
 
+// the main container
 const ObjectDetectorContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -75,6 +76,7 @@ const TargetBox = styled.div`
 export function ObjectDetector(props) {
   const fileInputRef = useRef();
   const imageRef = useRef();
+
   const [imgData, setImgData] = useState(null);
   const [predictions, setPredictions] = useState([]);
   const [isLoading, setLoading] = useState(false);
@@ -87,6 +89,7 @@ export function ObjectDetector(props) {
 
   const normalizePredictions = (predictions, imgSize) => {
     if (!predictions || !imgSize || !imageRef) return predictions || [];
+    
     return predictions.map((prediction) => {
       const { bbox } = prediction;
       const oldX = bbox[0];
@@ -105,21 +108,23 @@ export function ObjectDetector(props) {
       return { ...prediction, bbox: [x, y, width, height] };
     });
   };
-
+  
+  // pass html image element to the model
   const detectObjectsOnImage = async (imageElement, imgSize) => {
     const model = await cocoSsd.load({});
-    const predictions = await model.detect(imageElement, 6);
+    const predictions = await model.detect(imageElement, 6); // return type and score
     const normalizedPredictions = normalizePredictions(predictions, imgSize);
     setPredictions(normalizedPredictions);
     console.log("Predictions: ", predictions);
   };
 
+  // get the image as a url
   const readImage = (file) => {
     return new Promise((rs, rj) => {
       const fileReader = new FileReader();
       fileReader.onload = () => rs(fileReader.result);
       fileReader.onerror = () => rj(fileReader.error);
-      fileReader.readAsDataURL(file);
+      fileReader.readAsDataURL(file); // read it as base64 
     });
   };
 
@@ -161,11 +166,13 @@ export function ObjectDetector(props) {
             />
           ))}
       </DetectorContainer>
+
       <HiddenFileInput
         type="file"
         ref={fileInputRef}
         onChange={onSelectImage}
       />
+      
       <SelectButton onClick={openFilePicker}>
         {isLoading ? "Recognizing..." : "Select Image"}
       </SelectButton>
