@@ -90,6 +90,7 @@ export function ObjectDetector(props) {
   const normalizePredictions = (predictions, imgSize) => {
     if (!predictions || !imgSize || !imageRef) return predictions || [];
     
+    // for the calculation to work we need to get the old x values and y values with whatever factors they have been scaled with
     return predictions.map((prediction) => {
       const { bbox } = prediction;
       const oldX = bbox[0];
@@ -115,7 +116,7 @@ export function ObjectDetector(props) {
     const predictions = await model.detect(imageElement, 6); // return type and score
     const normalizedPredictions = normalizePredictions(predictions, imgSize);
     setPredictions(normalizedPredictions);
-    console.log("Predictions: ", predictions);
+    // console.log("Predictions: ", predictions);
   };
 
   // get the image as a url
